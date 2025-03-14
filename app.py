@@ -7,22 +7,8 @@ import streamlit as st
 from nltk.tokenize import word_tokenize
 import pandas as pd
 import nltk
-nltk.download('punkt')  
-import nltk
-nltk.download('punkt') 
-
-from nltk.tokenize import word_tokenize
-
-def preprocess_text(text):
-  
-    tokens = word_tokenize(text)
-    
-    return tokens
-
-
-
-
-
+nltk.data.path.append('/path/to/nltk_data') 
+nltk.download('punkt')
 
 
 try:
