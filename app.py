@@ -21,16 +21,17 @@ except ImportError:
     import nltk
 
 
+import nltk
+
 def ensure_nltk_resources():
     resources = ["punkt", "stopwords", "wordnet"]
     for resource in resources:
         try:
-            nltk.data.find(f"tokenizers/punkt")
+            nltk.data.find(f"tokenizers/{resource}" if resource == "punkt" else f"corpora/{resource}")
         except LookupError:
             nltk.download(resource)
 
 ensure_nltk_resources()
-
 from nltk.tokenize import word_tokenize
 
 
