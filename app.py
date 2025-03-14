@@ -8,6 +8,21 @@ from nltk.tokenize import word_tokenize
 import pandas as pd
 import nltk
 nltk.download('punkt')  
+import nltk
+nltk.download('punkt') 
+
+from nltk.tokenize import word_tokenize
+
+def preprocess_text(text):
+  
+    tokens = word_tokenize(text)
+    
+    return tokens
+
+
+resume_text = "This is a sample resume text."
+cleaned_text = preprocess_text(resume_text)
+print(cleaned_text)
 
 
 
