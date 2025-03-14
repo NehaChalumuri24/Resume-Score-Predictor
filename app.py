@@ -4,10 +4,9 @@ import re
 import joblib
 import numpy as np
 import streamlit as st
-from nltk.tokenize import word_tokenize
-import pandas as pd
 import subprocess
 import sys
+
 
 try:
     import nltk
@@ -15,31 +14,49 @@ except ImportError:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "nltk"])
     import nltk
 
+from nltk.tokenize import word_tokenize
+
+
+def ensure_nltk_resources():
+    resources = ["punkt", "stopwords", "wordnet"]
+    for resource in resources:
+        try:
+            nltk.data.find(f"tokenizers/{resource}")
+        except LookupError:
+            nltk.download(resource)
+
+ensure_nltk_resources()
 
 try:
     from docx import Document
 except ImportError:
-    os.system("pip install python-docx")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "python-docx"])
     from docx import Document
 
 
-model = joblib.load("resume_score_model.pkl")
-vectorizer = joblib.load("vectorizer.pkl")
-scaler = joblib.load("scaler.pkl")
+def load_model(file_name):
+    if os.path.exists(file_name):
+        return joblib.load(file_name)
+    else:
+        st.error(f"Missing model file: {file_name}. Ensure it's in the project directory.")
+        st.stop()
 
-salary_model = joblib.load("salary_model.pkl")
-salary_vectorizer = joblib.load("salary_vectorizer.pkl")
-salary_scaler = joblib.load("salary_scaler.pkl")
+model = load_model("resume_score_model.pkl")
+vectorizer = load_model("vectorizer.pkl")
+scaler = load_model("scaler.pkl")
+salary_model = load_model("salary_model.pkl")
+salary_vectorizer = load_model("salary_vectorizer.pkl")
+salary_scaler = load_model("salary_scaler.pkl")
 
 
-def extract_text_from_pdf(pdf_path):
-    doc = fitz.open(pdf_path)
+def extract_text_from_pdf(pdf_file):
+    doc = fitz.open(stream=pdf_file.read(), filetype="pdf")
     text = " ".join([page.get_text("text") for page in doc])
     return text
 
 
-def extract_text_from_docx(docx_path):
-    doc = Document(docx_path)
+def extract_text_from_docx(docx_file):
+    doc = Document(docx_file)
     text = " ".join([para.text for para in doc.paragraphs])
     return text
 
@@ -87,16 +104,13 @@ uploaded_file = st.file_uploader("Upload Resume", type=["pdf", "docx"])
 
 if uploaded_file is not None:
     if st.button("Submit"):
+       
         file_extension = uploaded_file.name.split(".")[-1]
-        file_path = os.path.join("temp." + file_extension)
-        with open(file_path, "wb") as f:
-            f.write(uploaded_file.getbuffer())
-
         
         if file_extension == "pdf":
-            resume_text = extract_text_from_pdf(file_path)
+            resume_text = extract_text_from_pdf(uploaded_file)
         elif file_extension == "docx":
-            resume_text = extract_text_from_docx(file_path)
+            resume_text = extract_text_from_docx(uploaded_file)
         else:
             st.error("Unsupported file format. Please upload a PDF or DOCX file.")
             st.stop()
@@ -106,27 +120,29 @@ if uploaded_file is not None:
 
        
         score = predict_resume_score(cleaned_text, experience, projects)
-
-        
         salary = predict_salary(cleaned_text, experience, projects)
 
-      
+     
         job_skills = ["python", "machine learning", "deep learning", "nlp", "data analysis"]
         resume_words = set(word_tokenize(cleaned_text))
         skills_to_improve = [skill for skill in job_skills if skill.lower() not in resume_words]
 
+       
         st.subheader("🏆 Resume Score:")
-        st.write(f"**{score}/100**")
+        st.write(f"{score}/100")
 
         st.subheader("💰 Predicted Salary Expectation (INR) Per Annum:")
-        st.write(f"**₹{salary}**")
+        st.write(f"₹{salary}")
 
         st.subheader("📊 Extracted Details:")
-        st.write(f"- **Experience:** {experience} years")
-        st.write(f"- **Projects Count:** {projects}")
+        st.write(f"- Experience: {experience} years")
+        st.write(f"- Projects Count: {projects}")
 
         st.subheader("💡 Skills to Improve:")
         if skills_to_improve:
             st.write(", ".join(skills_to_improve))
         else:
             st.write("✅ Your skills match well!")
+
+
+  
