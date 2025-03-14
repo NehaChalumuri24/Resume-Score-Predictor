@@ -19,19 +19,24 @@ except ImportError:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "nltk"])
     import nltk
 
-# Ensure NLTK resources are downloaded before use
+# Ensure correct NLTK resources are downloaded
 def ensure_nltk_resources():
-    resources = ["punkt", "stopwords", "wordnet"]
-    for resource in resources:
-        try:
-            if resource == "punkt":
-                nltk.data.find("tokenizers/punkt")  # Correct path for punkt
-            else:
-                nltk.data.find(f"corpora/{resource}")  # Correct paths for corpora
-        except LookupError:
-            nltk.download(resource)
+    try:
+        nltk.data.find("tokenizers/punkt")  # Check if 'punkt' exists
+    except LookupError:
+        nltk.download("punkt")  # Download the correct tokenizer
 
-ensure_nltk_resources()
+    try:
+        nltk.data.find("corpora/stopwords")
+    except LookupError:
+        nltk.download("stopwords")
+
+    try:
+        nltk.data.find("corpora/wordnet")
+    except LookupError:
+        nltk.download("wordnet")
+
+ensure_nltk_resources()  # Run this before using word_tokenize
 
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
