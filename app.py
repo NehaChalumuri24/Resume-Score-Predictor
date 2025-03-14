@@ -14,29 +14,6 @@ except ImportError:
     import fitz
 
 try:
-    import nltk
-except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "nltk"])
-    import nltk
-
-# Ensure correct NLTK resources are downloaded
-def ensure_nltk_resources():
-    required_resources = ["punkt", "stopwords", "wordnet"]
-    for resource in required_resources:
-        try:
-            if resource == "punkt":
-                nltk.data.find("tokenizers/punkt")  # Correct lookup for punkt
-            else:
-                nltk.data.find(f"corpora/{resource}")  # Lookup for stopwords/wordnet
-        except LookupError:
-            nltk.download(resource)
-
-ensure_nltk_resources()  # Run before using word_tokenize
-
-from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
-
-try:
     from docx import Document
 except ImportError:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "python-docx"])
@@ -75,14 +52,14 @@ def extract_text_from_docx(docx_file):
     except Exception as e:
         return f"Error reading DOCX: {str(e)}"
 
-# Preprocessing text function
+# Preprocessing text function (No NLTK)
 def preprocess_text(text):
     if not text.strip():
         return "Error: Empty text provided."
 
     text = text.lower()  # Convert to lowercase
     text = re.sub(r"[^a-zA-Z\s]", "", text)  # Remove special characters
-    tokens = word_tokenize(text)  # Tokenize words
+    tokens = text.split()  # Simple split instead of word_tokenize()
     return " ".join(tokens)  # Return cleaned text
 
 # Extract resume details (experience & projects)
@@ -123,7 +100,7 @@ def predict_salary(text, experience, projects):
         return None
 
 # Streamlit UI
-st.title("📄 AI Resume Scorer & Salary Predictor")
+st.title("📄 AI Resume Scorer & Salary Predictor (No NLTK)")
 st.write("Upload your resume (PDF or DOCX) to get a score, salary prediction in INR, and skill improvement suggestions!")
 
 uploaded_file = st.file_uploader("Upload Resume", type=["pdf", "docx"])
@@ -159,7 +136,7 @@ if uploaded_file is not None:
 
         # Suggest missing skills
         job_skills = ["python", "machine learning", "deep learning", "nlp", "data analysis"]
-        resume_words = set(word_tokenize(cleaned_text))
+        resume_words = set(cleaned_text.split())  # Simple split instead of NLTK tokenization
         skills_to_improve = [skill for skill in job_skills if skill.lower() not in resume_words]
 
         # Display results
@@ -178,4 +155,5 @@ if uploaded_file is not None:
             st.write(", ".join(skills_to_improve))
         else:
             st.write("✅ Your skills match well!")
+
 
