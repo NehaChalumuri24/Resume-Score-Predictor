@@ -13,11 +13,7 @@ def ensure_nltk_resources():
             nltk.data.find(f"tokenizers/{resource}")
         except LookupError:
             nltk.download(resource)
-try:
-    import fitz  
-except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "pymupdf"])
-    import fitz
+
 
 def ensure_nltk_resources():
     try:
@@ -67,10 +63,19 @@ salary_vectorizer = load_model("salary_vectorizer.pkl")
 salary_scaler = load_model("salary_scaler.pkl")
 
 
+import fitz 
+
 def extract_text_from_pdf(pdf_file):
-    doc = fitz.open(stream=pdf_file.read(), filetype="pdf")
-    text = " ".join([page.get_text("text") for page in doc])
-    return text
+    try:
+        pdf_bytes = pdf_file.read()
+        with fitz.open(stream=pdf_bytes, filetype="pdf") as doc:
+            text = " ".join([page.get_text("text") for page in doc])
+        
+        return text
+
+    except Exception as e:
+        return f"Error reading PDF: {str(e)}"
+
 
 
 def extract_text_from_docx(docx_file):
