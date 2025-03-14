@@ -6,6 +6,8 @@ import numpy as np
 import streamlit as st
 from nltk.tokenize import word_tokenize
 import pandas as pd
+import nltk
+nltk.download('punkt')  
 
 
 
