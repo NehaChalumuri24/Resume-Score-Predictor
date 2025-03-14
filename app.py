@@ -6,12 +6,14 @@ import numpy as np
 import streamlit as st
 from nltk.tokenize import word_tokenize
 import pandas as pd
-import nltk
-def download_nltk_resource(resource):
-    try:
-        nltk.data.find(f'tokenizers/{resource}')
-    except LookupError:
-        nltk.download(resource)
+import subprocess
+import sys
+
+try:
+    import nltk
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "nltk"])
+    import nltk
 
 
 try:
