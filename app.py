@@ -6,18 +6,11 @@ import streamlit as st
 import subprocess
 import sys
 
-def ensure_nltk_resources():
-    resources = ["punkt", "stopwords", "wordnet"]
-    for resource in resources:
-        try:
-            nltk.data.find(f"tokenizers/{resource}")
-        except LookupError:
-            nltk.download(resource)
 
 
 def ensure_nltk_resources():
     try:
-        nltk.data.find("tokenizers/punkt")  # Check if 'punkt' is available
+        nltk.data.find("tokenizers/punkt") 
     except LookupError:
         nltk.download("punkt") 
 
@@ -33,6 +26,13 @@ def ensure_nltk_resources():
     for resource in resources:
         try:
             nltk.data.find(f"tokenizers/punkt")
+        except LookupError:
+            nltk.download(resource)
+def ensure_nltk_resources():
+    resources = ["punkt", "stopwords", "wordnet"]
+    for resource in resources:
+        try:
+            nltk.data.find(f"tokenizers/{resource}")
         except LookupError:
             nltk.download(resource)
 
