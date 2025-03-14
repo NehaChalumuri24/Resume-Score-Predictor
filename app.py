@@ -5,7 +5,7 @@ import numpy as np
 import streamlit as st
 import subprocess
 import sys
-nltk.download('punkt_tab')
+
 def ensure_nltk_resources():
     resources = ["punkt", "stopwords", "wordnet"]
     for resource in resources:
