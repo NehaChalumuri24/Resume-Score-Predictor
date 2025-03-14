@@ -25,9 +25,9 @@ def ensure_nltk_resources():
     for resource in resources:
         try:
             if resource == "punkt":
-                nltk.data.find("tokenizers/punkt")
+                nltk.data.find("tokenizers/punkt")  # Correct path for punkt
             else:
-                nltk.data.find(f"corpora/{resource}")
+                nltk.data.find(f"corpora/{resource}")  # Correct paths for corpora
         except LookupError:
             nltk.download(resource)
 
