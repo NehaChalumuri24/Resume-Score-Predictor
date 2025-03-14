@@ -7,8 +7,11 @@ import streamlit as st
 from nltk.tokenize import word_tokenize
 import pandas as pd
 import nltk
-nltk.data.path.append('/path/to/nltk_data') 
-nltk.download('punkt')
+def download_nltk_resource(resource):
+    try:
+        nltk.data.find(f'tokenizers/{resource}')
+    except LookupError:
+        nltk.download(resource)
 
 
 try:
