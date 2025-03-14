@@ -21,17 +21,23 @@ except ImportError:
 
 # Ensure correct NLTK resources are downloaded
 def ensure_nltk_resources():
-     required_resources = ["punkt", "stopwords", "wordnet"]
-        nltk.data.find("tokenizers/punkt")  # Check if 'punkt' exists
+    required_resources = ["punkt", "stopwords", "wordnet"]
     for resource in required_resources:
-    except LookupError:
         try:
-        nltk.download("punkt")  # Download the correct tokenizer
-            nltk.data.find(f"tokenizers/{resource}") if resource == "punkt" else nltk.data.find(f"corpora/{resource}")
-
+            if resource == "punkt":
+                nltk.data.find("tokenizers/punkt")  # Check if 'punkt' exists
+            else:
+                nltk.data.find(f"corpora/{resource}")
         except LookupError:
-    try:
             nltk.download(resource)
+
+ensure_nltk_resources()  # Run this before using word_tokenize
+
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+
+try:
+    from docx import Document
 except ImportError:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "python-docx"])
     from docx import Document
