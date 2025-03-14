@@ -15,9 +15,6 @@ def ensure_nltk_resources():
             nltk.download(resource)
 
 
-ensure_nltk_resources()
-
-
 from nltk.tokenize import word_tokenize, sent_tokenize
 try:
     import fitz  # PyMuPDF
