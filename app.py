@@ -13,7 +13,11 @@ def ensure_nltk_resources():
             nltk.data.find(f"tokenizers/{resource}")
         except LookupError:
             nltk.download(resource)
-
+try:
+    import fitz  
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "pymupdf"])
+    import fitz
 
 def ensure_nltk_resources():
     try:
