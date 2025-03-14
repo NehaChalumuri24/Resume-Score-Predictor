@@ -121,8 +121,8 @@ if uploaded_file is not None:
             st.error("Unsupported file format. Please upload a PDF or DOCX file.")
             st.stop()
         if not resume_text or "Error reading" in resume_text:
-    st.error("❌ Unable to extract text from the uploaded file. Please try another file.")
-    st.stop()
+             st.error("❌ Unable to extract text from the uploaded file. Please try another file.")
+             st.stop()
 
         cleaned_text = preprocess_text(resume_text)  
 
