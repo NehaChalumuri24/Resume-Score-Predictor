@@ -7,33 +7,28 @@ import streamlit as st
 import subprocess
 import sys
 
-
+# Ensure NLTK is installed
 try:
     import nltk
 except ImportError:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "nltk"])
     import nltk
 
-from nltk.tokenize import word_tokenize
-
-
+# Ensure required NLTK resources are downloaded
 def ensure_nltk_resources():
     resources = ["punkt", "stopwords", "wordnet"]
     for resource in resources:
         try:
-            nltk.data.find(f"tokenizers/{resource}")
+            nltk.data.find(f"tokenizers/punkt")
         except LookupError:
             nltk.download(resource)
 
 ensure_nltk_resources()
 
-try:
-    from docx import Document
-except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "python-docx"])
-    from docx import Document
+# Import NLTK tokenization after ensuring punkt is available
+from nltk.tokenize import word_tokenize
 
-
+# Load models safely
 def load_model(file_name):
     if os.path.exists(file_name):
         return joblib.load(file_name)
@@ -48,26 +43,27 @@ salary_model = load_model("salary_model.pkl")
 salary_vectorizer = load_model("salary_vectorizer.pkl")
 salary_scaler = load_model("salary_scaler.pkl")
 
-
+# Function to extract text from PDF
 def extract_text_from_pdf(pdf_file):
     doc = fitz.open(stream=pdf_file.read(), filetype="pdf")
     text = " ".join([page.get_text("text") for page in doc])
     return text
 
-
+# Function to extract text from DOCX
 def extract_text_from_docx(docx_file):
+    from docx import Document
     doc = Document(docx_file)
     text = " ".join([para.text for para in doc.paragraphs])
     return text
 
-
+# Preprocessing text
 def preprocess_text(text):
     text = text.lower()
     text = re.sub(r"[^a-zA-Z\s]", "", text)
     tokens = word_tokenize(text)
     return " ".join(tokens)
 
-
+# Extract resume details (experience, projects)
 def extract_resume_details(text):
     exp_match = re.search(r'(\d{1,2})\s*(?:years?|yrs?)\s*(?:of experience|exp)?', text, re.IGNORECASE)
     experience = int(exp_match.group(1)) if exp_match else 0
@@ -77,7 +73,7 @@ def extract_resume_details(text):
 
     return experience, projects
 
-
+# Predict resume score
 def predict_resume_score(text, experience, projects):
     text_vectorized = vectorizer.transform([text]).toarray()
     numeric_features = np.array([[experience, projects]])
@@ -86,17 +82,17 @@ def predict_resume_score(text, experience, projects):
     score = model.predict(X_final)[0]
     return round(score, 2)
 
-
+# Predict salary expectation
 def predict_salary(text, experience, projects):
     text_vectorized = salary_vectorizer.transform([text]).toarray()
     numeric_features = np.array([[experience, projects]])
     numeric_features_scaled = salary_scaler.transform(numeric_features)
     X_final = np.hstack((text_vectorized, numeric_features_scaled))
     salary_usd = salary_model.predict(X_final)[0]
-    salary_inr = salary_usd * 83  
+    salary_inr = salary_usd * 83  # Convert to INR
     return round(salary_inr, 2)
 
-
+# Streamlit UI
 st.title("📄 AI Resume Scorer & Salary Predictor")
 st.write("Upload your resume (PDF or DOCX) to get a score, salary prediction in INR, and skill improvement suggestions!")
 
@@ -104,7 +100,7 @@ uploaded_file = st.file_uploader("Upload Resume", type=["pdf", "docx"])
 
 if uploaded_file is not None:
     if st.button("Submit"):
-       
+        # Extract text based on file type
         file_extension = uploaded_file.name.split(".")[-1]
         
         if file_extension == "pdf":
@@ -118,16 +114,16 @@ if uploaded_file is not None:
         cleaned_text = preprocess_text(resume_text)
         experience, projects = extract_resume_details(cleaned_text)
 
-       
+        # Predict score and salary
         score = predict_resume_score(cleaned_text, experience, projects)
         salary = predict_salary(cleaned_text, experience, projects)
 
-     
+        # Suggest missing skills
         job_skills = ["python", "machine learning", "deep learning", "nlp", "data analysis"]
         resume_words = set(word_tokenize(cleaned_text))
         skills_to_improve = [skill for skill in job_skills if skill.lower() not in resume_words]
 
-       
+        # Display results
         st.subheader("🏆 Resume Score:")
         st.write(f"{score}/100")
 
@@ -143,6 +139,3 @@ if uploaded_file is not None:
             st.write(", ".join(skills_to_improve))
         else:
             st.write("✅ Your skills match well!")
-
-
-  
