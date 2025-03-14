@@ -20,9 +20,7 @@ def preprocess_text(text):
     return tokens
 
 
-resume_text = "This is a sample resume text."
-cleaned_text = preprocess_text(resume_text)
-print(cleaned_text)
+
 
 
 
