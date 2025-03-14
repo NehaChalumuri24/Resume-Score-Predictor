@@ -15,12 +15,11 @@ def ensure_nltk_resources():
             nltk.download(resource)
 
 
-from nltk.tokenize import word_tokenize, sent_tokenize
-try:
-    import fitz  # PyMuPDF
-except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "pymupdf"])
-    import fitz
+def ensure_nltk_resources():
+    try:
+        nltk.data.find("tokenizers/punkt")  # Check if 'punkt' is available
+    except LookupError:
+        nltk.download("punkt") 
 
 
 try:
@@ -77,9 +76,9 @@ def extract_text_from_docx(docx_file):
 
 
 def preprocess_text(text):
-    text = text.lower()
-    text = re.sub(r"[^a-zA-Z\s]", "", text)
-    tokens = word_tokenize(text)
+    text = text.lower()  
+    text = re.sub(r"[^a-zA-Z\s]", "", text)  
+    tokens = word_tokenize(text)  
     return " ".join(tokens)
 
 
